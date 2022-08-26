@@ -54,11 +54,14 @@ build_image() {
 tag_and_push_image() {
   local repo_name=$(basename `git rev-parse --show-toplevel`)
   local docker_registry_base='docker.elastic.co'
-  local app_and_tag=${1}
-  buildah images --filter "reference=*$app_name*"
+  local app_name=${1}
+  local tag=${2}
+  local app_and_tag='$app_name/$tag'
 
   echo "--- Tagging container image $app_and_tag"
   buildah tag "$app_and_tag" "$docker_registry_base/$repo_name/$app_and_tag"
+
+  buildah images --filter "reference=*$app_name*"
 
   echo "+++ Pushing image to $docker_registry_base/$repo_name/$app_and_tag"
   buildah push "$docker_registry_base/$repo_name/$app_and_tag"
@@ -104,7 +107,7 @@ build_image $dockerfile_path $docker_image_name $tag
 if [ "$build_only" = false ]; then
   echo "logging in"
   container_registry_login $docker_registry_vault_path
-  tag_and_push_image '$docker_image_name/$tag'
+  tag_and_push_image $docker_image_name $tag
 else
   echo "skipping tag and push"
 fi
