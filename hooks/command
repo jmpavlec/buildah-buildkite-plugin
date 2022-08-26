@@ -56,7 +56,7 @@ tag_and_push_image() {
   local docker_registry_base='docker.elastic.co'
   local app_name=${1}
   local tag=${2}
-  local app_and_tag='$app_name/$tag'
+  local app_and_tag=$app_name:$tag
 
   echo "--- Tagging container image $app_and_tag"
   buildah tag "$app_and_tag" "$docker_registry_base/$repo_name/$app_and_tag"

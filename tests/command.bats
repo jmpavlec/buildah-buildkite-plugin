@@ -25,19 +25,27 @@ load '/usr/local/lib/bats/load.bash'
   export BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH="tests/fakedir"
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME="myAppName"
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH="vault-path"
-  export BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY="true"
+  #export BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY="true"
+  export VAULT_TOKEN=abc123
 
+  stub vault \
+    "read -field password vault-path : echo TESTING"
+  stub git \
+   "rev-parse --show-toplevel : echo 'myRepoName'"
   stub cd "tests/fakedir"
 
   stub buildah \
-    "--version"
-  stub buildah 'bud -t myAppName:aaabbbc .'
+    "--version" \
+    "bud -t myAppName:aaabbbc ." \
+    "login -u cloudci --password-stdin docker.elastic.co"
 
   run bash -c "$PWD/hooks/command"
 
   assert_success
   assert_output --partial "Reading plugin parameters"
   assert_output --partial "Building Container in directory"
+  assert_output --partial "--- Tagging container image myAppName:aaabbbc"
+  assert_output --partial "+++ Pushing image to docker.elastic.co/myRepoName/myAppName:aaabbbc"
 
   #unstub cd
   #unstub buildah
