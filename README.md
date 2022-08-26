@@ -11,6 +11,7 @@ steps:
       - jmpavlec/buildah#v0.0.1:
           docker_image_name: cloud-ui
           dockerfile_path: cloud-ui
+          tag: 1.0.0
           pre_build_steps:
             - "echo Do whatever presteps you need before the build"
 ```

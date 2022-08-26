@@ -62,7 +62,6 @@ tag_and_push_image() {
 
   echo "--- Pushing image to $docker_registry_base/$repo_name/$app_and_tag"
   buildah push "$docker_registry_base/$repo_name/$app_and_tag"
-
 }
 
 validate_required_properties(){
@@ -85,9 +84,8 @@ validate_required_properties
 
 docker_image_name=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME}
 dockerfile_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH}
-tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-latest}
+tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-${BUILDKITE_COMMIT:0:7}}
 build_only=${BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY:-false}
-
 
 # Work-around for Buildah rootless issue
 export STORAGE_DRIVER=vfs
@@ -100,8 +98,8 @@ build_image $dockerfile_path $docker_image_name $tag
 #only do if requested
 if [ "$build_only" = false ]; then
   echo "logging in"
-  #container_registry_login
-  #tag_and_push_image '$app_name/$tag'
+  container_registry_login
+  tag_and_push_image '$docker_image_name/$tag'
 else
   echo "skipping tag and push"
 fi

@@ -5,6 +5,7 @@ load '/usr/local/lib/bats/load.bash'
 # Uncomment the following line to debug stub failures
  export CD_STUB_DEBUG=/dev/tty
  export BUILDAH_STUB_DEBUG=/dev/tty
+ export BUILDKITE_COMMIT=aaabbbccceee
 
 @test "should fail when required properties are not included" {
   export BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH=""
@@ -26,7 +27,8 @@ load '/usr/local/lib/bats/load.bash'
   stub cd "tests/fakedir"
 
   stub buildah \
-   "bud -t myAppName:latest ."
+    "--version"
+  stub buildah 'bud -t myAppName:aaabbbc .'
 
   run bash -c "$PWD/hooks/command"
 

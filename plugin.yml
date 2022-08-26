@@ -19,7 +19,7 @@ configuration:
     build_only:
       type: boolean
       description: Only build the docker image, don't push it
-    tags:
-      type: ['string', 'array']
-      description: Additonal tags to add to the docker image
+    tag:
+      type: string
+      description: Additional tags to add to the docker image. Default is BUILDKITE_COMMIT up to character 7. e.g. ${BUILDKITE_COMMIT:0:7} '01161e5'
   required: ['docker_image_name', 'dockerfile_path']
