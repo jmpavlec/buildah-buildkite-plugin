@@ -88,7 +88,7 @@ dockerfile_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH}
 tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-latest}
 build_only=${BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY:-false}
 
-build_image $dockerfile_path docker_image_name $tag
+build_image $dockerfile_path $docker_image_name $tag
 
 #only do if requested
 if [ "$build_only" = false ]; then
