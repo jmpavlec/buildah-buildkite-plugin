@@ -1,0 +1,25 @@
+name: Buildah
+description: Buildkite plugin to wrap around buildah for building, pushing, and tagging docker images.
+#TODO change to elastic
+author: https://github.com/jmpavlec
+requirements:
+  - docker
+  - vault
+configuration:
+  properties:
+    docker_image_name:
+      type: string
+      description: The name of the docker image
+    dockerfile_path:
+      type: string
+      description: The full path from the base of the repo to the directory containing the Dockerfile
+    pre_build_steps:
+      type: ['string', 'array']
+      description: Commands to execute before the build takes places
+    build_only:
+      type: boolean
+      description: Only build the docker image, don't push it
+    tags:
+      type: ['string', 'array']
+      description: Additonal tags to add to the docker image
+  required: ['docker_image_name', 'dockerfile_path']

@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+retry() {
+  local retries=$1; shift
+  local delay=$1; shift
+  local attempts=1
+
+  until "$@"; do
+    retry_exit_status=$?
+    echo "Exited with $retry_exit_status" >&2
+    if (( retries == "0" )); then
+      return $retry_exit_status
+    elif (( attempts == retries )); then
+      echo "Failed $attempts retries" >&2
+      return $retry_exit_status
+    else
+      echo "Retrying $((retries - attempts)) more times..." >&2
+      attempts=$((attempts + 1))
+      sleep "$delay"
+    fi
+  done
+}
+
+container_registry_login() {
+  local registryPath="${1}"
+  if [ -z "$VAULT_TOKEN" ]; then
+    echo "No valid VAULT_TOKEN specified. Exiting.."
+    exit 1
+  fi
+
+  # Login to docker registry
+  DOCKER_PASSWORD=$(retry 5 5 vault read -field password ${registryPath})
+  if [ -z "$DOCKER_PASSWORD" ]; then
+    echo "No valid DOCKER_PASSWORD retrieved from Vault. Exiting..."
+    exit 1
+  fi
+
+  echo "$DOCKER_PASSWORD" | buildah login -u cloudci --password-stdin docker.elastic.co
+}
+
+build_image() {
+  local dockerfile_path=${1}
+  local app_name=${2}
+  local tag=${3}
+  echo "--- Building Container in directory $dockerfile_path"
+  cd $dockerfile_path
+
+  echo "--- Building container image $app_name"
+  buildah bud -t $app_name:$tag .
+}
+
+tag_and_push_image() {
+  local repo_name=$(basename `git rev-parse --show-toplevel`)
+  local docker_registry_base='docker.elastic.co'
+  local app_and_tag=${1}
+  buildah images --filter "reference=*$app_name*"
+
+  echo "--- Tagging container image $app_and_tag"
+  buildah tag "$app_and_tag" "$docker_registry_base/$repo_name/$app_and_tag"
+
+  echo "--- Pushing image to $docker_registry_base/$repo_name/$app_and_tag"
+  buildah push "$docker_registry_base/$repo_name/$app_and_tag"
+
+}
+
+validate_required_properties(){
+  local valid=1
+  if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME:-} ]]; then
+    echo "'docker_image_name' property is required"
+   valid=0
+  fi
+  if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH:-} ]]; then
+    echo "'dockerfile_path' property is required"
+   valid=0
+  fi
+  if [ "$valid" -eq "0" ]; then
+    exit 1
+  fi
+}
+
+echo '--- Reading plugin parameters'
+validate_required_properties
+
+docker_image_name=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME}
+dockerfile_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH}
+app_name=${BUILDKITE_PLUGIN_BUILDAH_APP_NAME}
+tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-latest}
+build_only=${BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY:-false}
+
+build_image $dockerfile_path $app_name $tag
+
+#only do if requested
+if [ "$build_only" = false ]; then
+  echo "logging in"
+  #container_registry_login
+  #tag_and_push_image '$app_name/$tag'
+else
+  echo "skipping tag and push"
+fi
+
+
+
