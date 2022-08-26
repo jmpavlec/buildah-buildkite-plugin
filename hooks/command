@@ -85,11 +85,10 @@ validate_required_properties
 
 docker_image_name=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME}
 dockerfile_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH}
-app_name=${BUILDKITE_PLUGIN_BUILDAH_APP_NAME}
 tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-latest}
 build_only=${BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY:-false}
 
-build_image $dockerfile_path $app_name $tag
+build_image $dockerfile_path docker_image_name $tag
 
 #only do if requested
 if [ "$build_only" = false ]; then

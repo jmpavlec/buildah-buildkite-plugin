@@ -20,8 +20,7 @@ load '/usr/local/lib/bats/load.bash'
 #WIP test, stubs not working
 @test "should attempt to build image with required properties" {
   export BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH="tests/fakedir"
-  export BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME="test"
-  export BUILDKITE_PLUGIN_BUILDAH_APP_NAME="myAppName"
+  export BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME="myAppName"
   export BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY="true"
 
   stub cd "tests/fakedir"

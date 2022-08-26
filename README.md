@@ -37,7 +37,7 @@ steps:
   - env:
       BUILDKITE_PLUGINS_ALWAYS_CLONE_FRESH: "true"
     plugins:
-    - jmpavlec/buildah##dev-branch:
+    - jmpavlec/buildah#dev-branch:
         docker_image_name: cloud-ui
         dockerfile_path: cloud-ui
 ```
