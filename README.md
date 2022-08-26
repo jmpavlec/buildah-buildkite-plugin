@@ -11,10 +11,9 @@ steps:
       - jmpavlec/buildah#v0.0.1:
           docker_image_name: cloud-ui
           dockerfile_path: cloud-ui
-          docker_registry_vault_path: secret/ci/elastic-cloud/docker-registry
+          vault_secret_path: secret/ci/elastic-cloud/docker-registry
+          docker_registry_path: docker.elastic.co/cloud-ci/cloud-ui
           tag: 1.0.0
-          pre_build_steps:
-            - "echo Do whatever presteps you need before the build"
     # Specifying the agent isn't strictly necessary, but you will need an agent image with buildah installed
     agents:
       image: docker.elastic.co/ci-agent-images/drivah:0.16.0
@@ -55,7 +54,8 @@ steps:
     - jmpavlec/buildah#dev-branch:
         docker_image_name: cloud-ui
         dockerfile_path: cloud-ui
-        docker_registry_vault_path: secret/ci/elastic-cloud/docker-registry
+        vault_secret_path: secret/ci/elastic-cloud/docker-registry
+        docker_registry_path: docker.elastic.co/cloud-ci/cloud-ui
     env:
       BUILDKITE_PLUGINS_ALWAYS_CLONE_FRESH: "true"
     # Specifying the agent isn't strictly necessary, but you will need an agent image with buildah installed

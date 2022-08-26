@@ -52,35 +52,38 @@ build_image() {
 }
 
 tag_and_push_image() {
-  local repo_name=$(basename `git rev-parse --show-toplevel`)
-  local docker_registry_base='docker.elastic.co'
   local app_name=${1}
   local tag=${2}
+  local docker_registry_path=${3}
   local app_and_tag=$app_name:$tag
 
   echo "--- Tagging container image $app_and_tag"
-  buildah tag "$app_and_tag" "$docker_registry_base/$repo_name/$app_and_tag"
+  buildah tag "$app_and_tag" "$docker_registry_path/$app_and_tag"
 
   buildah images --filter "reference=*$app_name*"
 
-  echo "+++ Pushing image to $docker_registry_base/$repo_name/$app_and_tag"
-  buildah push "$docker_registry_base/$repo_name/$app_and_tag"
+  echo "+++ Pushing image to $docker_registry_path/$app_and_tag"
+  buildah push "$docker_registry_path/$app_and_tag"
 }
 
 validate_required_properties(){
   local valid=1
   if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME:-} ]]; then
     echo "'docker_image_name' property is required"
-   valid=0
+    valid=0
   fi
   if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH:-} ]]; then
     echo "'dockerfile_path' property is required"
-   valid=0
+    valid=0
   fi
-   if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH:-} ]]; then
-      echo "'docker_registry_vault_path' property is required"
-     valid=0
-    fi
+  if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_VAULT_SECRET_PATH:-} ]]; then
+    echo "'vault_secret_path' property is required"
+    valid=0
+  fi
+  if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_PATH:-} ]]; then
+    echo "'docker_registry_path' property is required"
+    valid=0
+  fi
   if [ "$valid" -eq "0" ]; then
     exit 1
   fi
@@ -91,7 +94,8 @@ validate_required_properties
 
 docker_image_name=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME}
 dockerfile_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH}
-docker_registry_vault_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH}
+vault_secret_path=${BUILDKITE_PLUGIN_BUILDAH_VAULT_SECRET_PATH}
+docker_registry_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_PATH}
 tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-${BUILDKITE_COMMIT:0:7}}
 build_only=${BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY:-false}
 
@@ -106,8 +110,8 @@ build_image $dockerfile_path $docker_image_name $tag
 #only do if requested
 if [ "$build_only" = false ]; then
   echo "logging in"
-  container_registry_login $docker_registry_vault_path
-  tag_and_push_image $docker_image_name $tag
+  container_registry_login $vault_secret_path
+  tag_and_push_image $docker_image_name $tag $docker_registry_path
 else
   echo "skipping tag and push"
 fi
