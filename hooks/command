@@ -47,7 +47,7 @@ build_image() {
   echo "--- Building Container in directory $dockerfile_path"
   cd $dockerfile_path
 
-  echo "--- Building container image $app_name"
+  echo "+++ Building container image $app_name"
   buildah bud -t $app_name:$tag .
 }
 
@@ -60,7 +60,7 @@ tag_and_push_image() {
   echo "--- Tagging container image $app_and_tag"
   buildah tag "$app_and_tag" "$docker_registry_base/$repo_name/$app_and_tag"
 
-  echo "--- Pushing image to $docker_registry_base/$repo_name/$app_and_tag"
+  echo "+++ Pushing image to $docker_registry_base/$repo_name/$app_and_tag"
   buildah push "$docker_registry_base/$repo_name/$app_and_tag"
 }
 
@@ -74,6 +74,10 @@ validate_required_properties(){
     echo "'dockerfile_path' property is required"
    valid=0
   fi
+   if [[ -z ${BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH:-} ]]; then
+      echo "'docker_registry_vault_path' property is required"
+     valid=0
+    fi
   if [ "$valid" -eq "0" ]; then
     exit 1
   fi
@@ -84,6 +88,7 @@ validate_required_properties
 
 docker_image_name=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME}
 dockerfile_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH}
+docker_registry_vault_path=${BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH}
 tag=${BUILDKITE_PLUGIN_BUILDAH_TAG:-${BUILDKITE_COMMIT:0:7}}
 build_only=${BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY:-false}
 
@@ -98,7 +103,7 @@ build_image $dockerfile_path $docker_image_name $tag
 #only do if requested
 if [ "$build_only" = false ]; then
   echo "logging in"
-  container_registry_login
+  container_registry_login $docker_registry_vault_path
   tag_and_push_image '$docker_image_name/$tag'
 else
   echo "skipping tag and push"

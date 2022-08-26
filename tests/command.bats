@@ -10,18 +10,21 @@ load '/usr/local/lib/bats/load.bash'
 @test "should fail when required properties are not included" {
   export BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH=""
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME=""
+  export BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH=""
 
   run "$PWD/hooks/command"
 
   assert_failure
   assert_output --partial "'docker_image_name' property is required"
   assert_output --partial "'dockerfile_path' property is required"
+  assert_output --partial "'docker_registry_vault_path' property is required"
 }
 
 #WIP test, stubs not working
 @test "should attempt to build image with required properties" {
   export BUILDKITE_PLUGIN_BUILDAH_DOCKERFILE_PATH="tests/fakedir"
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME="myAppName"
+  export BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_VAULT_PATH="vault-path"
   export BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY="true"
 
   stub cd "tests/fakedir"

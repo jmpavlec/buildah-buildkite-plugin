@@ -1,7 +1,7 @@
 # buildah-buildkite-plugin
 [![GitHub Release](https://img.shields.io/github/release/jmpavlec/buildah-buildkite-plugin.svg)](https://github.com/jmpavlec/buildah-buildkite-plugin/releases)
 
-Buildkite plugin to wrap around buildah for building, pushing, and tagging docker images
+Buildkite plugin to wrap around [buildah](https://buildah.io/) for building, pushing, and tagging docker images
 
 ## Using the plugin
 
@@ -11,20 +11,36 @@ steps:
       - jmpavlec/buildah#v0.0.1:
           docker_image_name: cloud-ui
           dockerfile_path: cloud-ui
+          docker_registry_vault_path: secret/ci/elastic-cloud/docker-registry
           tag: 1.0.0
           pre_build_steps:
             - "echo Do whatever presteps you need before the build"
+    # Specifying the agent isn't strictly necessary, but you will need an agent image with buildah installed
+    agents:
+      image: docker.elastic.co/ci-agent-images/drivah:0.16.0
+      ephemeralStorage: 10G
+      memory: 4G
 ```
+
+This will result in an image being built and pushed this location:
+
 
 ## Developing the plugin
 
 Buildkite guide for writing plugins: https://buildkite.com/docs/plugins/writing
 
 ### Validating plugin.yml
-Uses a docker-compose file that runs the [buildkite-plugin-linted](https://github.com/buildkite-plugins/buildkite-plugin-linter)
+Uses a docker-compose file that runs the [buildkite-plugin-linter](https://github.com/buildkite-plugins/buildkite-plugin-linter)
 
 ```shell
 docker-compose run --rm lint
+```
+
+### Testing your code
+Uses a docker-compose file that runs the [buildkite-plugin-tester](https://github.com/buildkite-plugins/buildkite-plugin-tester)
+
+```shell
+docker-compose run --rm test
 ```
 
 
@@ -35,12 +51,18 @@ you may have added.
 
 ```yaml
 steps:
-  - env:
-      BUILDKITE_PLUGINS_ALWAYS_CLONE_FRESH: "true"
-    plugins:
+  - plugins:
     - jmpavlec/buildah#dev-branch:
         docker_image_name: cloud-ui
         dockerfile_path: cloud-ui
+        docker_registry_vault_path: secret/ci/elastic-cloud/docker-registry
+    env:
+      BUILDKITE_PLUGINS_ALWAYS_CLONE_FRESH: "true"
+    # Specifying the agent isn't strictly necessary, but you will need an agent image with buildah installed
+    agents:
+      image: docker.elastic.co/ci-agent-images/drivah:0.16.0
+      ephemeralStorage: 10G
+      memory: 4G
 ```
 ## Releasing the plugin
 TODO Github Releases with a tag...

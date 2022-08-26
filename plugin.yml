@@ -13,6 +13,9 @@ configuration:
     dockerfile_path:
       type: string
       description: The full path from the base of the repo to the directory containing the Dockerfile
+    docker_registry_vault_path:
+      type: string
+      description: The vault path to get the secrets for the docker registry login
     pre_build_steps:
       type: ['string', 'array']
       description: Commands to execute before the build takes places
@@ -22,4 +25,4 @@ configuration:
     tag:
       type: string
       description: Additional tags to add to the docker image. Default is BUILDKITE_COMMIT up to character 7. e.g. ${BUILDKITE_COMMIT:0:7} '01161e5'
-  required: ['docker_image_name', 'dockerfile_path']
+  required: ['docker_image_name', 'dockerfile_path', 'docker_registry_vault_path'']
