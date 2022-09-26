@@ -48,7 +48,8 @@ build_image() {
   cd $dockerfile_path
 
   echo "+++ Building container image $app_name"
-  buildah bud -t $app_name:$tag . ${BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS:-}
+  echo "buildah bud -t $app_name:$tag ${BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS:-} ."
+  buildah bud -t $app_name:$tag ${BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS:-} .
 }
 
 tag_and_push_image() {
