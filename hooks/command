@@ -106,12 +106,14 @@ export BUILDAH_ISOLATION=chroot
 
 buildah --version
 
+#Necessary to login as some Dockerfile's base images are in Elastic's repos
+echo "logging in"
+container_registry_login $vault_secret_path
+
 build_image $dockerfile_path $docker_image_name $tag
 
 #only do if requested
 if [ "$build_only" = false ]; then
-  echo "logging in"
-  container_registry_login $vault_secret_path
   tag_and_push_image $docker_image_name $tag $docker_registry_path
 else
   echo "skipping tag and push"
