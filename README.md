@@ -39,7 +39,7 @@ docker-compose run --rm lint
 Uses a docker-compose file that runs the [buildkite-plugin-tester](https://github.com/buildkite-plugins/buildkite-plugin-tester)
 
 ```shell
-docker-compose run --rm test
+docker-compose run --rm tests
 ```
 
 

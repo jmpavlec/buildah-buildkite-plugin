@@ -12,6 +12,7 @@ load '/usr/local/lib/bats/load.bash'
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_IMAGE_NAME=""
   export BUILDKITE_PLUGIN_BUILDAH_VAULT_SECRET_PATH=""
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_PATH=""
+  export BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS=""
 
   run "$PWD/hooks/command"
 
@@ -29,6 +30,7 @@ load '/usr/local/lib/bats/load.bash'
   export BUILDKITE_PLUGIN_BUILDAH_VAULT_SECRET_PATH="vault-path"
   export BUILDKITE_PLUGIN_BUILDAH_DOCKER_REGISTRY_PATH="docker.elastic.co/cloud-ci/cloud-ui"
   #export BUILDKITE_PLUGIN_BUILDAH_BUILD_ONLY="true"
+  export BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS="--build-arg my-arg=custom-arg"
   export VAULT_TOKEN=abc123
 
   stub vault \
@@ -37,7 +39,7 @@ load '/usr/local/lib/bats/load.bash'
 
   stub buildah \
     "--version" \
-    "bud -t myAppName:aaabbbc ." \
+    "bud -t myAppName:aaabbbc . --build-arg my-arg=custom-arg" \
     "login -u cloudci --password-stdin docker.elastic.co"
 
   run bash -c "$PWD/hooks/command"
