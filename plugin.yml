@@ -27,7 +27,7 @@ configuration:
       description: Only build the docker image, don't push it
     additional_build_args:
       type: string
-      description: Additional build args to buildah when building the docker image. e.g. --build-arg ui_app=userconsole
+      description: Additional build args to buildah when building the docker image. e.g. --build-arg ui_app=saas-userconsole
     tag:
       type: string
       description: Additional tags to add to the docker image. Default is BUILDKITE_COMMIT up to character 7. e.g. ${BUILDKITE_COMMIT:0:7} '01161e5'

@@ -48,8 +48,8 @@ build_image() {
   cd $dockerfile_path
 
   echo "+++ Building container image $app_name"
-  echo "buildah bud -t $app_name:$tag ${BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS:-} ."
   buildah bud -t $app_name:$tag ${BUILDKITE_PLUGIN_BUILDAH_ADDITIONAL_BUILD_ARGS:-} .
+  echo "---"
 }
 
 tag_and_push_image() {
@@ -65,6 +65,7 @@ tag_and_push_image() {
 
   echo "+++ Pushing image to $docker_registry_path/$app_and_tag"
   buildah push "$docker_registry_path/$app_and_tag"
+  echo "---"
 }
 
 validate_required_properties(){
@@ -107,7 +108,7 @@ export BUILDAH_ISOLATION=chroot
 buildah --version
 
 #Necessary to login as some Dockerfile's base images are in Elastic's repos
-echo "logging in"
+echo "--- logging in"
 container_registry_login $vault_secret_path
 
 build_image $dockerfile_path $docker_image_name $tag
